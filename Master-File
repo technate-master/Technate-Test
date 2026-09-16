@@ -1,1 +1,35 @@
+import subprocess
+import sys
 
+def install_playwright():
+    """Automatically installs playwright and browser binaries if missing."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        print("Installing playwright...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "playwright"])
+        subprocess.check_call(["playwright", "install", "chromium"])
+        subprocess.check_call(["playwright", "install-deps", "chromium"])
+
+def main():
+    # Ensure dependencies are present
+    install_playwright()
+    
+    from playwright.sync_api import sync_playwright
+
+    print("Launching headless browser in Codespace...")
+    with sync_playwright() as p:
+        # Launch browser (headless=True is required for cloud-based Codespaces)
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        
+        # Navigate to Google
+        page.goto("https://www.google.com")
+        
+        print(f"Success! Page title is: {page.title()}")
+        
+        # Keep it open for a moment or take an action if needed
+        browser.close()
+
+if __name__ == "__main__":
+    main()
